@@ -38,7 +38,7 @@ public class ZookeeperCreate {
 		});
 		//主线程阻塞等待连接对象创建成功
 		countDownLatch.await();
-		System.out.println(zooKeeper.getSessionId());
+		System.out.println("会话ID:"+zooKeeper.getSessionId());
 	}
 
 	@After
@@ -118,5 +118,88 @@ public class ZookeeperCreate {
 		//创建节点,添加二进制数据,
 		zooKeeper.create("/create/node6","node6".getBytes(),
 				acls,CreateMode.PERSISTENT);
+	}
+
+	/**
+	 * digest授权模式
+	 * @throws Exception
+	 */
+	@Test
+	public void create7() throws Exception {
+
+		//创建访问控制表列表
+		List<ACL> acls = new ArrayList<>();
+		//创建授权模式和授权对象,大id
+		Id id = new Id("digest","mulan:xxxxxxxxxxx");
+		acls.add(new ACL(ZooDefs.Perms.ALL,id));
+		zooKeeper.create("/create/node7","node7".getBytes(),
+				acls,CreateMode.PERSISTENT);
+	}
+
+	/**
+	 * 持久化顺序节点
+	 * @throws Exception
+	 */
+	@Test
+	public void create8() throws Exception {
+
+		String s = zooKeeper.create("/create/node8",
+				"node8".getBytes(),
+				ZooDefs.Ids.OPEN_ACL_UNSAFE,
+				CreateMode.PERSISTENT_SEQUENTIAL);
+		System.out.println(s);
+	}
+
+	/**
+	 *临时节点
+	 * @throws Exception
+	 */
+	@Test
+	public void create9() throws Exception {
+
+		String s = zooKeeper.create("/create/node9",
+				"node9".getBytes(),
+				ZooDefs.Ids.OPEN_ACL_UNSAFE,
+				CreateMode.EPHEMERAL);
+		System.out.println(s);
+	}
+
+	/**
+	 * 临时顺序节点
+	 * @throws Exception
+	 */
+	@Test
+	public void create10() throws Exception {
+
+		String s = zooKeeper.create("/create/node10",
+				"node10".getBytes(),
+				ZooDefs.Ids.OPEN_ACL_UNSAFE,
+				CreateMode.EPHEMERAL_SEQUENTIAL);
+		System.out.println(s);
+	}
+
+	/**
+	 * 异步方式创建节点
+	 * @throws Exception
+	 */
+	@Test
+	public void create11() throws Exception {
+		zooKeeper.create("/create/node11",
+				"node11".getBytes(),
+				ZooDefs.Ids.OPEN_ACL_UNSAFE,
+				CreateMode.PERSISTENT,
+				(i, s, o, s1) -> {
+					//0代表创建成功
+					System.out.println("rc:"+i);
+					//节点路径
+					System.out.println("节点路径："+s);
+					//上下文对象
+					System.out.println("上下文对象："+o);
+					//上下文参数
+					System.out.println("上下文参数："+s1);
+				},
+		"I am context");
+		Thread.sleep(10000);
+		System.out.println("结束");
 	}
 }
